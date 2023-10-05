@@ -22,7 +22,7 @@ pip install folium
 pip install requests
 
 ```
-#### Map of sigle or multiple flight paths. (track.ipynb)
+#### Map of flight paths. (track.ipynb)
 ![flightpath](https://github.com/gcm107/AviationWorks/assets/60047556/bbe1b932-3a5f-488a-accc-239b26c24e6b)
 
 #### Current Position of All Aircrcaft received. 
