@@ -1,5 +1,5 @@
 # AviationWorks
-Code for tracking flights, getting weather forecasts, and displaying this information in a way useful for others. *This is still an AviationWork in progress.*
+An advanced software solution designed for real-time flight tracking and weather forecasting. It presents data in an intuitive and comprehensive manner suitable for industry stakeholders. Currently under development at AviationWork.
 
 ## Installs
 Required to run the code:
