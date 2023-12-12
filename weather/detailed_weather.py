@@ -1,5 +1,6 @@
 
 import avwx
+from avwx.forecast import *
 import asyncio
 
 # Function to Fetch Data
@@ -13,7 +14,7 @@ async def fetch_airport_data_async(airport_codes):
             data["metar"] = {
                 "raw": metar.raw,
                 "flight_rules": metar.data.flight_rules,
-                "summary": metar.summary,
+                "summary": metar.summary, 
             }
         else:
             data["metar"] = None
