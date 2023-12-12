@@ -8,6 +8,9 @@ An advanced software solution designed for real-time flight tracking and weather
 ![flightpath](https://github.com/gcm107/AviationWorks/assets/60047556/98bae37b-c89e-4274-9c1d-2422024892fd)
 
 
+#### Choose airports and get a detailed aviation weather report (METAR, TAF). 
+![Screenshot 2023-12-12 at 11 43 47](https://github.com/gcm107/AviationWorks/assets/60047556/eb0125ef-358d-4227-90c4-1138aa2a3999)
+
 
 ## Installs
 Required to run the code:
