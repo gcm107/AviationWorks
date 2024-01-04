@@ -123,7 +123,7 @@ def generate_summary_html_safe(airports_data):
 
 # Async Main Function to Drive the Process
 async def main():
-    airports = ['KHHR', 'KSBA', 'KSJC', 'KTRK']
+    airports = ['KHHR', 'KSBA', 'KSQL', 'KSJC', 'KTRK']
     data = await fetch_airport_data_async(airports)
     html_output = generate_summary_html_safe(data)
     with open("weather_summary.html", "w") as file:
