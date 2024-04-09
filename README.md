@@ -1,5 +1,5 @@
 # AviationWorks
-An advanced software solution designed for real-time flight tracking and weather forecasting. It presents data in an intuitive and comprehensive manner suitable for industry stakeholders. Currently under development at AviationWork.
+Designed for real-time flight tracking and weather forecasting. It presents data in an intuitive and comprehensive manner. Currently under development.
 
 ### Flask web-app (app.py)
 ![Screenshot 2023-10-05 at 4 36 39 PM](https://github.com/gcm107/AviationWorks/assets/60047556/64c37c04-086b-4666-90df-cb74a75dcbee)
