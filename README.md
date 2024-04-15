@@ -9,6 +9,8 @@ Designed for real-time flight tracking and weather forecasting. It presents data
 
 
 #### Choose airports and get a detailed aviation weather report (METAR, TAF). 
+![weathermap](https://github.com/gcm107/AviationWorks/assets/60047556/a7fda578-2bd8-4aff-a707-e50bbc41028a)
+
 ![Screenshot 2023-12-12 at 11 43 47](https://github.com/gcm107/AviationWorks/assets/60047556/eb0125ef-358d-4227-90c4-1138aa2a3999)
 
 
