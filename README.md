@@ -23,7 +23,7 @@ export PORT=5050
 python app.py
 ```
 
-open http://127.0.0.1:5050 and use the callsign box (defaults to `SWA`).
+open http://127.0.0.1:5050 and use the callsign box (defaults to `EJA`).
 
 ## notes
 - Change the callsign filter as needed.
