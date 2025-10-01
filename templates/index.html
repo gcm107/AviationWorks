@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AviationWorks Flight Tracker (Local)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root{
+            --bg-900:#0f172a; /* slate-900 */
+            --bg-800:#111827; /* gray-900 */
+            --panel:#1f2937;  /* gray-800 */
+            --panel-2:#111827;
+            --text:#e5e7eb;   /* gray-200 */
+            --muted:#9ca3af;  /* gray-400 */
+            --border:#27344a;
+            --primary:#2563eb; /* blue-600 */
+            --primary-hover:#1d4ed8; /* blue-700 */
+            --success:#10b981; /* emerald-500 */
+            --warning:#f59e0b; /* amber-500 */
+        }
+        body { background: var(--bg-900); color: var(--text); }
+        .main-container { background: var(--panel); border:1px solid var(--border); border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); margin: 20px; padding: 22px; }
+        .header h2{ color:#f3f4f6; }
+        .header .sub{ color:var(--muted); }
+        .stats-card { background: var(--panel-2); color:var(--text); border:1px solid var(--border); border-radius: 10px; padding:14px; text-align:center; }
+        .filter-section { background: var(--panel-2); border:1px solid var(--border); border-radius: 10px; padding:16px; }
+        .form-control, .form-select{ background: #0b1220; color: var(--text); border:1px solid var(--border); }
+        .form-control::placeholder{ color: #6b7280; }
+        .btn-primary{ background: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover{ background: var(--primary-hover); border-color: var(--primary-hover); }
+        .btn-outline-secondary{ color: var(--text); border-color: var(--border); }
+        .btn-outline-secondary:hover{ background:#0b1220; }
+        .btn-outline-primary{ color:#cbd5e1; border-color: var(--primary); }
+        .btn-outline-primary:hover{ background: var(--primary); color:#fff; }
+        .card{ background: var(--panel-2); border:1px solid var(--border); }
+        .card-header{ background: #0b1220; color:#cbd5e1; border-bottom:1px solid var(--border); }
+        .table{ color:#cbd5e1; }
+        .table thead th{ background:#0b1220; color:#cbd5e1; border-bottom:1px solid var(--border); }
+        .table tbody tr{ border-color: var(--border); }
+        .status-badge { padding: 4px 10px; border-radius: 16px; font-size: .8em; font-weight:600; }
+        .status-in-air { background: rgba(37,99,235,.15); color:#93c5fd; border:1px solid rgba(37,99,235,.35); }
+        .status-on-ground { background: rgba(148,163,184,.15); color:#cbd5e1; border:1px solid rgba(148,163,184,.35); }
+        .map-container { border-radius: 10px; overflow:hidden; box-shadow: 0 6px 18px rgba(0,0,0,0.35); border:1px solid var(--border); }
+        .leaflet-control-layers{ background:#0b1220 !important; color:#e5e7eb !important; border:1px solid var(--border) !important; }
+        .leaflet-control-layers label{ color:#e5e7eb !important; }
+    </style>
+    <meta http-equiv="Cache-control" content="no-cache">
+</head>
+<body>
+<div class="main-container">
+    <div class="mb-3 text-center">
+        <h2><i class="fas fa-plane"></i> AviationWorks Flight Tracker</h2>
+        <div class="text-muted">local mode — showing EJA flights by default</div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3"><div class="stats-card"><div id="total-aircraft">-</div><div>Total</div></div></div>
+        <div class="col-md-3"><div class="stats-card"><div id="in-air-count">-</div><div>In Air</div></div></div>
+        <div class="col-md-3"><div class="stats-card"><div id="on-ground-count">-</div><div>On Ground</div></div></div>
+        <div class="col-md-3"><div class="stats-card"><div id="last-update">-</div><div>Last Update</div></div></div>
+    </div>
+
+    <div class="filter-section mb-3">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Callsign</label>
+                <input id="callsignFilter" class="form-control" placeholder="e.g., EJA" value="EJA" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Country</label>
+                <input id="countryFilter" class="form-control" placeholder="(optional)" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Min Alt (m)</label>
+                <input id="minAltFilter" type="number" class="form-control" placeholder="0" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Max Alt (m)</label>
+                <input id="maxAltFilter" type="number" class="form-control" placeholder="50000" />
+            </div>
+        </div>
+        <div class="mt-3 d-flex justify-content-center align-items-center gap-2">
+            <button class="btn btn-primary me-2" onclick="applyFilters()"><i class="fas fa-search"></i> Apply</button>
+            <button class="btn btn-outline-secondary me-3" onclick="clearFilters()"><i class="fas fa-eraser"></i> Clear</button>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="autoRefreshToggle" checked>
+                <label class="form-check-label" for="autoRefreshToggle">Auto-refresh (30s)</label>
+            </div>
+            <button class="btn btn-outline-primary ms-2" onclick="manualRefresh()"><i class="fas fa-sync"></i> Refresh Now</button>
+        </div>
+    </div>
+
+    <div class="map-container mb-3">
+        <div id="map" style="height:480px; display:flex; align-items:center; justify-content:center; color:#666;">loading map…</div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-cloud"></i> In Air</div>
+                <div class="card-body p-0">
+                    <table class="table mb-0" id="inAirTable">
+                        <thead><tr><th>Callsign</th><th>Country</th><th>Alt</th><th>Speed</th><th>Status</th></tr></thead>
+                        <tbody id="inAirTableBody"><tr><td colspan="5" class="text-center text-muted">loading…</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"><i class="fas fa-warehouse"></i> On Ground</div>
+                <div class="card-body p-0">
+                    <table class="table mb-0" id="onGroundTable">
+                        <thead><tr><th>Callsign</th><th>Country</th><th>Category</th><th>Last Contact</th><th>Status</th></tr></thead>
+                        <tbody id="onGroundTableBody"><tr><td colspan="5" class="text-center text-muted">loading…</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4 text-center" style="color:var(--muted); font-size:.9rem;">
+        data provided by 
+        <a href="https://opensky-network.org/" target="_blank" rel="noopener" style="color:#93c5fd; text-decoration:none;">OpenSky Network</a>
+    </div>
+</div>
+
+<script>
+let autoTimer = null;
+// track state defaults: show all tracks on initial load
+window.__trackAll__ = true;
+window.__trackOne__ = null;
+
+async function loadDataAndMap(params) {
+  const qs = params.toString();
+  const trackParam = (window.__trackAll__ ? '&tracks=all' : (window.__trackOne__ ? `&track_icao24=${window.__trackOne__}` : ''));
+  const [airRes, mapRes] = await Promise.all([
+    fetch(`/api/aircraft?${qs}`),
+    fetch(`/api/map?${qs}${trackParam}`)
+  ]);
+  if (!airRes.ok) throw new Error('aircraft failed');
+  if (!mapRes.ok) throw new Error('map failed');
+  const data = await airRes.json();
+  const map = await mapRes.json();
+  updateStats(data);
+  updateTables(data);
+  document.getElementById('map').innerHTML = map.map_html;
+  wireTrackInteractions();
+}
+
+function updateStats(d){
+  document.getElementById('total-aircraft').textContent = d.total || 0;
+  document.getElementById('in-air-count').textContent = (d.in_air||[]).length;
+  document.getElementById('on-ground-count').textContent = (d.on_ground||[]).length;
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+}
+
+function updateTables(d){
+  const inAir = d.in_air || [], onGround = d.on_ground || [];
+  const inBody = document.getElementById('inAirTableBody');
+  const onBody = document.getElementById('onGroundTableBody');
+  inBody.innerHTML = '';
+  onBody.innerHTML = '';
+  if (!inAir.length) inBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">none</td></tr>';
+  if (!onGround.length) onBody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">none</td></tr>';
+  inAir.forEach(a=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td><strong>${a.callsign}</strong><br><small class="text-muted">${a.icao24}</small></td>
+      <td>${a.origin_country}</td>
+      <td>${a.baro_altitude? Math.round(a.baro_altitude)+'m':'N/A'}</td>
+      <td>${a.velocity? Math.round(a.velocity)+' m/s':'N/A'}</td>
+      <td><span class="status-badge status-in-air">In Air</span></td>`;
+    inBody.appendChild(tr);
+  });
+  onGround.forEach(a=>{
+    const tr = document.createElement('tr');
+    const last = a.last_contact? new Date(a.last_contact*1000).toLocaleTimeString() : 'N/A';
+    tr.innerHTML = `<td><strong>${a.callsign}</strong><br><small class="text-muted">${a.icao24}</small></td>
+      <td>${a.origin_country}</td>
+      <td>${a.category ?? 'N/A'}</td>
+      <td>${last}</td>
+      <td><span class="status-badge status-on-ground">On Ground</span></td>`;
+    onBody.appendChild(tr);
+  });
+}
+
+function applyFilters(){
+  const params = new URLSearchParams({
+    callsign: document.getElementById('callsignFilter').value || 'EJA',
+  });
+  const c = document.getElementById('countryFilter').value;
+  const minA = document.getElementById('minAltFilter').value;
+  const maxA = document.getElementById('maxAltFilter').value;
+  if(c) params.append('country', c);
+  if(minA) params.append('min_alt', minA);
+  if(maxA) params.append('max_alt', maxA);
+  loadDataAndMap(params).catch(()=>{
+    document.getElementById('map').innerHTML = '<div style="padding:1rem;color:#a00;">failed to load data</div>';
+  });
+}
+
+function clearFilters(){
+  document.getElementById('callsignFilter').value = 'EJA';
+  document.getElementById('countryFilter').value = '';
+  document.getElementById('minAltFilter').value = '';
+  document.getElementById('maxAltFilter').value = '';
+  applyFilters();
+}
+
+function setupAutoRefresh(){
+  const toggle = document.getElementById('autoRefreshToggle');
+  if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+  if (toggle.checked) {
+    autoTimer = setInterval(()=> applyFilters(), 30000);
+  }
+}
+
+function manualRefresh(){
+  applyFilters();
+}
+
+document.addEventListener('DOMContentLoaded', ()=> {
+  document.getElementById('autoRefreshToggle').addEventListener('change', setupAutoRefresh);
+  applyFilters();
+  setupAutoRefresh();
+});
+
+// track interactions: click a plane icon to draw its track; checkbox to draw all
+let allTracksCheckbox = null;
+let tracksOnMap = {};
+
+function wireTrackInteractions(){
+  // add an in-map checkbox (top-right) to toggle all tracks
+  if (!allTracksCheckbox){
+    const c = document.createElement('div');
+    c.style.position = 'absolute';
+    c.style.top = '14px';
+    c.style.right = '14px';
+    c.style.zIndex = 1000;
+    c.innerHTML = `<label style="background:#0b1220;border:1px solid #27344a;color:#e5e7eb;padding:6px 10px;border-radius:8px;display:flex;gap:6px;align-items:center;">
+      <input id="allTracks" type="checkbox" ${window.__trackAll__ ? 'checked' : ''} />
+      <span>show tracks for all</span>
+    </label>`;
+    document.querySelector('.map-container').appendChild(c);
+    allTracksCheckbox = document.getElementById('allTracks');
+    allTracksCheckbox.addEventListener('change', toggleAllTracks);
+  }
+
+  // click handler for individual plane icons
+  document.querySelectorAll('.plane-marker').forEach(node => {
+    node.style.cursor = 'pointer';
+    node.addEventListener('click', () => drawSingleTrack(node.getAttribute('data-icao')));
+  });
+  // make global alias for inline onclick in marker html
+  window.__drawTrack = drawSingleTrack;
+}
+
+async function drawSingleTrack(icao24){
+  try{
+    window.__trackOne__ = icao24; // remember the selection across refreshes
+    window.__trackAll__ = false;
+    if (allTracksCheckbox) allTracksCheckbox.checked = false;
+    // rebuild with a single track
+    const params = new URLSearchParams({ callsign: document.getElementById('callsignFilter').value || 'EJA' });
+    const c = document.getElementById('countryFilter').value;
+    const minA = document.getElementById('minAltFilter').value;
+    const maxA = document.getElementById('maxAltFilter').value;
+    if(c) params.append('country', c);
+    if(minA) params.append('min_alt', minA);
+    if(maxA) params.append('max_alt', maxA);
+    await loadDataAndMap(params);
+  }catch(e){ console.error(e); }
+}
+
+async function toggleAllTracks(){
+  try{
+    // re-run current filters to get qs
+    const params = new URLSearchParams({ callsign: document.getElementById('callsignFilter').value || 'EJA' });
+    const c = document.getElementById('countryFilter').value;
+    const minA = document.getElementById('minAltFilter').value;
+    const maxA = document.getElementById('maxAltFilter').value;
+    if(c) params.append('country', c);
+    if(minA) params.append('min_alt', minA);
+    if(maxA) params.append('max_alt', maxA);
+    if (!allTracksCheckbox.checked){
+      window.__trackAll__ = false;
+      window.__trackOne__ = null;
+      await loadDataAndMap(params); // redraw without tracks
+      return;
+    }
+    window.__trackAll__ = true;
+    window.__trackOne__ = null;
+    await loadDataAndMap(params); // redraw with tracks=all
+  }catch(e){ console.error(e); }
+}
+</script>
+</body>
+</html>
+
+

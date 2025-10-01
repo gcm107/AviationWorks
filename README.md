@@ -1,45 +1,35 @@
-# AviationWorks
+# AviationWorks (Local Flight Tracker)
+
+local-only setup for a modern styled flight tracker
+
+## prerequisites
+- python 3.11 
+- `.env` at project root with:
+```
+OPENSKY_CLIENT_ID=your_client_id_here
+OPENSKY_CLIENT_SECRET=your_client_secret_here
+```
+
+## install
+```
+pip install -r requirements.txt
+```
+
+## run (local only)
+```
+export FLASK_DEBUG=1
+export HOST=127.0.0.1
+export PORT=5050
+python app.py
+```
+
+open http://127.0.0.1:5050 and use the callsign box (defaults to `SWA`).
+
+## notes
+- Change the callsign filter as needed.
+
+## data attribution
+- live flight data is provided by the [OpenSky Network](https://opensky-network.org/).
+- api docs referenced: [`states/all`](https://openskynetwork.github.io/opensky-api/rest.html#all-state-vectors) and related endpoints.
 Designed for real-time flight tracking and weather forecasting. It presents data in an intuitive and comprehensive manner. Currently under development.
-
-### Flask web-app (app.py)
-![Screenshot 2023-10-05 at 4 36 39 PM](https://github.com/gcm107/AviationWorks/assets/60047556/64c37c04-086b-4666-90df-cb74a75dcbee)
-
-#### Map of flight paths. (track.ipynb)
-![flightpath](https://github.com/gcm107/AviationWorks/assets/60047556/98bae37b-c89e-4274-9c1d-2422024892fd)
-
-
-#### Choose airports and get a detailed aviation weather report (METAR, TAF). 
-![Screenshot 2023-12-12 at 11 43 47](https://github.com/gcm107/AviationWorks/assets/60047556/eb0125ef-358d-4227-90c4-1138aa2a3999)
-
-
-## Installs
-Required to run the code:
-- Flight Tracking:
-opensky
-- Weather (you can use your own basemap, of course):
-AVWX-Engine
-- Basemap:
-folium
-
-
-```
-pip install flask opensky-api pandas folium sqlite3 python-dotenv
-
-```
-If you get errors innstalling opensky-api, try it this way:
-```
-pip install https://github.com/openskynetwork/opensky-api/archive/master.zip#subdirectory=python
-```
-
-## Usage
-1. First clone the repo. (AviationWorks/tracking)
-2. In your terminal cd to the tracking folder (AviationWorks/tracking).
-3. If you know the airline or flights you want to track, you can replace the filter in the get_fdy() to suit your needs.\
-   Note: if there is no filter, all flights currently flying will be shown. (Not recommended)
-4. Run the following in your terminal. If you 
-   ```
-   python3 app.py
-   ```
-5. Open your browser and navigate to your local host. (The server it is running on can be found in the .log file)
-
 
