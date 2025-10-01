@@ -1,4 +1,4 @@
-# AviationWorks (Local Flight Tracker)
+# AviationWorks Python Based Flight Tracker
 
 local-only setup for a modern styled flight tracker
 
